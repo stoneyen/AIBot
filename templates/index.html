@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Color Display - {{ color }}</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: {{ color }};
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: {{ '#000000' if color == '#FFFFFF' else '#FFFFFF' }};
+            font-family: Arial, sans-serif;
+            transition: background-color 0.5s ease;
+            overflow: hidden;
+        }
+
+        .color-info {
+            padding: 10px 20px;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 20px;
+            background-color: rgba(255, 255, 255, 0.2);
+            padding: 15px;
+            border-radius: 5px;
+        }
+
+        button {
+            padding: 8px 16px;
+            border: none;
+            background-color: rgba(255, 255, 255, 0.8);
+            color: #333;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        button:hover {
+            background-color: rgba(255, 255, 255, 1);
+        }
+
+        .toggle-ui {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: rgba(255, 255, 255, 0.2);
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="toggle-ui" onclick="toggleUI()">Toggle UI</div>
+    
+    <div id="ui-elements">
+        <div class="color-info">
+            <h1>Current Color: {{ color }}</h1>
+            <p>RGB: <span id="rgb-value"></span></p>
+        </div>
+        
+        <div class="controls">
+            <button onclick="randomColor()">Random Color</button>
+            <button onclick="goToEndpoint('/color/FF0000')">Red</button>
+            <button onclick="goToEndpoint('/color/00FF00')">Green</button>
+            <button onclick="goToEndpoint('/color/0000FF')">Blue</button>
+            <button onclick="goToEndpoint('/')">White</button>
+            <button onclick="goToEndpoint('/color/000000')">Black</button>
+        </div>
+    </div>
+
+    <script>
+        // Convert hex to RGB for display
+        function hexToRgb(hex) {
+            // Remove # if present
+            hex = hex.replace(/^#/, '');
+            
+            // Convert 3-digit hex to 6-digit
+            if (hex.length === 3) {
+                hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
+            }
+            
+            // Parse the hex values
+            const r = parseInt(hex.substring(0, 2), 16);
+            const g = parseInt(hex.substring(2, 4), 16);
+            const b = parseInt(hex.substring(4, 6), 16);
+            
+            return `${r}, ${g}, ${b}`;
+        }
+        
+        // Update RGB value display
+        document.getElementById('rgb-value').textContent = hexToRgb('{{ color }}'.replace(/^#/, ''));
+        
+        // Toggle UI visibility
+        function toggleUI() {
+            const uiElements = document.getElementById('ui-elements');
+            uiElements.classList.toggle('hidden');
+        }
+        
+        // Navigate to a color endpoint
+        function goToEndpoint(endpoint) {
+            window.location.href = endpoint;
+        }
+        
+        // Generate a random color
+        function randomColor() {
+            const randomHex = Math.floor(Math.random()*16777215).toString(16);
+            goToEndpoint(`/color/${randomHex}`);
+        }
+        
+        // Add keyboard shortcuts
+        document.addEventListener('keydown', (event) => {
+            switch(event.key) {
+                case 'h':
+                    toggleUI();
+                    break;
+                case 'r':
+                    goToEndpoint('/color/FF0000');
+                    break;
+                case 'g':
+                    goToEndpoint('/color/00FF00');
+                    break;
+                case 'b':
+                    goToEndpoint('/color/0000FF');
+                    break;
+                case 'w':
+                    goToEndpoint('/');
+                    break;
+                case 'k':
+                    goToEndpoint('/color/000000');
+                    break;
+                case ' ':
+                    randomColor();
+                    break;
+            }
+        });
+    </script>
+</body>
+</html>
