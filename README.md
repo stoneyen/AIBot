@@ -12,8 +12,8 @@ A Python FastAPI service that provides an API to display colors in full screen. 
 
 1. Clone the repository:
 ```bash
-git clone <repository-url>
-cd <repository-name>
+git clone https://github.com/stoneyen/AIBot.git
+cd AIBot
 ```
 
 2. Install the required dependencies:
