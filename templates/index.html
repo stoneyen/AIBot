@@ -63,13 +63,48 @@
             z-index: 10;
         }
 
+        .connection-status {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background-color: rgba(255, 255, 255, 0.2);
+            padding: 5px 10px;
+            border-radius: 3px;
+            z-index: 10;
+            font-size: 12px;
+        }
+
+        .connected {
+            color: #00ff00;
+        }
+
+        .disconnected {
+            color: #ff0000;
+        }
+
+        .remote-indicator {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background-color: rgba(255, 255, 255, 0.2);
+            padding: 5px 10px;
+            border-radius: 3px;
+            z-index: 10;
+            font-size: 12px;
+            display: none;
+        }
+
         .hidden {
             display: none;
         }
     </style>
 </head>
 <body>
+    <div class="connection-status" id="connection-status">
+        <span class="disconnected">WebSocket: Disconnected</span>
+    </div>
     <div class="toggle-ui" onclick="toggleUI()">Toggle UI</div>
+    <div class="remote-indicator" id="remote-indicator">Color changed remotely</div>
     
     <div id="ui-elements">
         <div class="color-info">
@@ -125,6 +160,96 @@
             const randomHex = Math.floor(Math.random()*16777215).toString(16);
             goToEndpoint(`/color/${randomHex}`);
         }
+        
+        // WebSocket functionality
+        let ws = null;
+        let reconnectInterval = null;
+        
+        function connectWebSocket() {
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsUrl = `${protocol}//${window.location.host}/ws`;
+            
+            ws = new WebSocket(wsUrl);
+            
+            ws.onopen = function() {
+                console.log('WebSocket connected');
+                updateConnectionStatus(true);
+                if (reconnectInterval) {
+                    clearInterval(reconnectInterval);
+                    reconnectInterval = null;
+                }
+            };
+            
+            ws.onmessage = function(event) {
+                try {
+                    const data = JSON.parse(event.data);
+                    
+                    if (data.type === 'color_update') {
+                        updateColor(data.hex, data.rgb, data.source === 'remote');
+                    } else if (data.error) {
+                        console.error('WebSocket error:', data.error);
+                    }
+                } catch (e) {
+                    console.error('Error parsing WebSocket message:', e);
+                }
+            };
+            
+            ws.onclose = function() {
+                console.log('WebSocket disconnected');
+                updateConnectionStatus(false);
+                
+                // Attempt to reconnect every 5 seconds
+                if (!reconnectInterval) {
+                    reconnectInterval = setInterval(connectWebSocket, 5000);
+                }
+            };
+            
+            ws.onerror = function(error) {
+                console.error('WebSocket error:', error);
+            };
+        }
+        
+        function updateConnectionStatus(connected) {
+            const statusElement = document.getElementById('connection-status');
+            const span = statusElement.querySelector('span');
+            
+            if (connected) {
+                span.textContent = 'WebSocket: Connected';
+                span.className = 'connected';
+            } else {
+                span.textContent = 'WebSocket: Disconnected';
+                span.className = 'disconnected';
+            }
+        }
+        
+        function updateColor(hexColor, rgbValues, isRemote = false) {
+            // Update background color
+            document.body.style.backgroundColor = hexColor;
+            
+            // Update color info
+            const colorTitle = document.querySelector('.color-info h1');
+            const rgbDisplay = document.getElementById('rgb-value');
+            
+            colorTitle.textContent = `Current Color: ${hexColor}`;
+            rgbDisplay.textContent = `${rgbValues.r}, ${rgbValues.g}, ${rgbValues.b}`;
+            
+            // Update page title
+            document.title = `Color Display - ${hexColor}`;
+            
+            // Show remote indicator if color was changed remotely
+            if (isRemote) {
+                const remoteIndicator = document.getElementById('remote-indicator');
+                remoteIndicator.style.display = 'block';
+                
+                // Hide the indicator after 3 seconds
+                setTimeout(() => {
+                    remoteIndicator.style.display = 'none';
+                }, 3000);
+            }
+        }
+        
+        // Initialize WebSocket connection
+        connectWebSocket();
         
         // Add keyboard shortcuts
         document.addEventListener('keydown', (event) => {
