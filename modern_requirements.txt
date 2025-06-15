@@ -1,0 +1,26 @@
+# Modern EV3 Bluetooth Controller Requirements
+# Install with: pip install -r modern_requirements.txt
+
+# Modern Bluetooth communication
+bleak>=0.20.0
+
+# PyQt6 for GUI
+PyQt6>=6.5.0
+PyQt6-Charts>=6.5.0
+
+# Async Qt integration
+qasync>=0.24.0
+
+# Real-time plotting
+pyqtgraph>=0.13.0
+
+# Scheduling and automation
+schedule>=1.2.0
+
+# Additional utilities
+pyserial>=3.5
+
+# Development and testing (optional)
+# pytest>=7.0.0
+# pytest-asyncio>=0.21.0
+# pytest-qt>=4.2.0
