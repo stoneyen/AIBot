@@ -1,0 +1,19 @@
+# EV3 Bluetooth Controller Requirements
+# Install with: pip install -r ev3_requirements.txt
+
+# Core Bluetooth communication
+pybluez>=0.23
+
+# Scheduling and automation
+schedule>=1.2.0
+
+# Additional utilities
+pyserial>=3.5
+
+# For better cross-platform Bluetooth support (alternative to pybluez)
+# Uncomment if pybluez doesn't work on your system:
+# bleak>=0.20.0
+
+# Development and testing
+# pytest>=7.0.0
+# pytest-asyncio>=0.21.0
